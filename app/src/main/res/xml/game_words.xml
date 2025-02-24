@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<hangman>
+    <newGame>
+        <phrase>Testing</phrase>
+        <hint>This is a hint</hint>
+    </newGame>
+    <newGame>
+        <phrase>This is a multiword game</phrase>
+        <hint>This is a hint</hint>
+    </newGame>
+</hangman>
