@@ -110,8 +110,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
-
 @Composable
 fun HangmanGame(modifier: Modifier = Modifier, words: List<HangmanWord> = listOf(), viewModel: HangmanViewModel) {
     val currentWord = viewModel.currentWord
@@ -156,6 +154,7 @@ fun HangmanGame(modifier: Modifier = Modifier, words: List<HangmanWord> = listOf
     }
 
     if (gameState == GameState.WIN || gameState == GameState.LOSE) {
+        viewModel.onGameOver()
         GameOverScreen(gameState) {
             viewModel.resetGame(words)
         }
@@ -429,9 +428,7 @@ fun GameOverScreen(gameState: GameState, onRestart: () -> Unit) {
 
             Button(
                 onClick = {
-                    CoroutineScope(Dispatchers.Main).launch {
-                        onRestart()
-                    }
+                    onRestart()
                 },
                 modifier = Modifier.padding(top = 10.dp)
             ) {
