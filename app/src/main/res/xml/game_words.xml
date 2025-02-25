@@ -1,11 +1,271 @@
 <?xml version="1.0" encoding="utf-8"?>
 <hangman>
     <newGame>
-        <phrase>Testing</phrase>
-        <hint>This is a hint</hint>
+        <phrase>Sunset</phrase>
+        <hint>The time when the sun goes down</hint>
     </newGame>
     <newGame>
-        <phrase>This is a multiword game</phrase>
-        <hint>This is a hint</hint>
+        <phrase>Electric Guitar</phrase>
+        <hint>A musical instrument often used in rock music</hint>
+    </newGame>
+    <newGame>
+        <phrase>Black Hole</phrase>
+        <hint>An area in space with strong gravitational pull</hint>
+    </newGame>
+    <newGame>
+        <phrase>Quantum Mechanics</phrase>
+        <hint>A fundamental theory in physics</hint>
+    </newGame>
+    <newGame>
+        <phrase>Mount Everest</phrase>
+        <hint>The tallest mountain in the world</hint>
+    </newGame>
+    <newGame>
+        <phrase>Artificial Intelligence</phrase>
+        <hint>A field of computer science focused on machine learning</hint>
+    </newGame>
+    <newGame>
+        <phrase>Silent Night</phrase>
+        <hint>A famous Christmas carol</hint>
+    </newGame>
+    <newGame>
+        <phrase>Golden Gate Bridge</phrase>
+        <hint>A famous landmark in San Francisco</hint>
+    </newGame>
+    <newGame>
+        <phrase>Chess Champion</phrase>
+        <hint>A title given to the best chess players</hint>
+    </newGame>
+    <newGame>
+        <phrase>Hidden Treasure</phrase>
+        <hint>Something valuable that is secretly kept</hint>
+    </newGame>
+    <newGame>
+        <phrase>Harvest</phrase>
+        <hint>Gathering crops</hint>
+    </newGame>
+    <newGame>
+        <phrase>Lantern</phrase>
+        <hint>A portable light</hint>
+    </newGame>
+    <newGame>
+        <phrase>Whisper</phrase>
+        <hint>Speak very softly</hint>
+    </newGame>
+    <newGame>
+        <phrase>Timber</phrase>
+        <hint>Wood for building</hint>
+    </newGame>
+    <newGame>
+        <phrase>Fortune</phrase>
+        <hint>Great wealth or luck</hint>
+    </newGame>
+    <newGame>
+        <phrase>Journey</phrase>
+        <hint>A long trip</hint>
+    </newGame>
+    <newGame>
+        <phrase>Gadget</phrase>
+        <hint>A small mechanical device</hint>
+    </newGame>
+    <newGame>
+        <phrase>Flame</phrase>
+        <hint>Burning fire</hint>
+    </newGame>
+    <newGame>
+        <phrase>Glacier</phrase>
+        <hint>A large mass of ice</hint>
+    </newGame>
+    <newGame>
+        <phrase>Plunge</phrase>
+        <hint>To fall or dive suddenly</hint>
+    </newGame>
+    <newGame>
+        <phrase>Cactus</phrase>
+        <hint>A desert plant</hint>
+    </newGame>
+    <newGame>
+        <phrase>Fossil</phrase>
+        <hint>Preserved remains of an organism</hint>
+    </newGame>
+    <newGame>
+        <phrase>Enigma</phrase>
+        <hint>A mystery or puzzle</hint>
+    </newGame>
+    <newGame>
+        <phrase>Brisket</phrase>
+        <hint>A cut of beef</hint>
+    </newGame>
+    <newGame>
+        <phrase>Glisten</phrase>
+        <hint>Shine with a soft light</hint>
+    </newGame>
+    <newGame>
+        <phrase>Voyage</phrase>
+        <hint>A long journey, often by sea</hint>
+    </newGame>
+    <newGame>
+        <phrase>Orbit</phrase>
+        <hint>Path of a planet</hint>
+    </newGame>
+    <newGame>
+        <phrase>Marble</phrase>
+        <hint>A type of stone</hint>
+    </newGame>
+    <newGame>
+        <phrase>Tundra</phrase>
+        <hint>A cold, treeless region</hint>
+    </newGame>
+    <newGame>
+        <phrase>Prairie</phrase>
+        <hint>A large grassland</hint>
+    </newGame>
+    <newGame>
+        <phrase>Canyon</phrase>
+        <hint>A deep valley with steep sides</hint>
+    </newGame>
+    <newGame>
+        <phrase>Beacon</phrase>
+        <hint>A guiding light</hint>
+    </newGame>
+    <newGame>
+        <phrase>Falcon</phrase>
+        <hint>A bird of prey</hint>
+    </newGame>
+    <newGame>
+        <phrase>Summit</phrase>
+        <hint>The top of a mountain</hint>
+    </newGame>
+    <newGame>
+        <phrase>Crater</phrase>
+        <hint>A hole in the ground, often from impact</hint>
+    </newGame>
+    <newGame>
+        <phrase>Anchor</phrase>
+        <hint>Used to hold a ship in place</hint>
+    </newGame>
+    <newGame>
+        <phrase>Insect</phrase>
+        <hint>A small six-legged creature</hint>
+    </newGame>
+    <newGame>
+        <phrase>Riddle</phrase>
+        <hint>A tricky question or puzzle</hint>
+    </newGame>
+    <newGame>
+        <phrase>Parade</phrase>
+        <hint>A festive procession</hint>
+    </newGame>
+    <newGame>
+        <phrase>Break the Ice</phrase>
+        <hint>Start a conversation</hint>
+    </newGame>
+    <newGame>
+        <phrase>Piece of Cake</phrase>
+        <hint>Something very easy</hint>
+    </newGame>
+    <newGame>
+        <phrase>Burning the Midnight Oil</phrase>
+        <hint>Working late into the night</hint>
+    </newGame>
+    <newGame>
+        <phrase>On Cloud Nine</phrase>
+        <hint>Extremely happy</hint>
+    </newGame>
+    <newGame>
+        <phrase>Under the Weather</phrase>
+        <hint>Feeling sick</hint>
+    </newGame>
+    <newGame>
+        <phrase>A Needle in a Haystack</phrase>
+        <hint>Something hard to find</hint>
+    </newGame>
+    <newGame>
+        <phrase>Hit the Nail on the Head</phrase>
+        <hint>Be exactly right</hint>
+    </newGame>
+    <newGame>
+        <phrase>Through Thick and Thin</phrase>
+        <hint>In all situations</hint>
+    </newGame>
+    <newGame>
+        <phrase>Let the Cat Out of the Bag</phrase>
+        <hint>Reveal a secret</hint>
+    </newGame>
+    <newGame>
+        <phrase>Back to Square One</phrase>
+        <hint>Starting over</hint>
+    </newGame>
+    <newGame>
+        <phrase>Bite the Bullet</phrase>
+        <hint>Face a difficult situation</hint>
+    </newGame>
+    <newGame>
+        <phrase>Jumping on the Bandwagon</phrase>
+        <hint>Following a trend</hint>
+    </newGame>
+    <newGame>
+        <phrase>Spill the Beans</phrase>
+        <hint>Reveal a secret</hint>
+    </newGame>
+    <newGame>
+        <phrase>Throw in the Towel</phrase>
+        <hint>Give up</hint>
+    </newGame>
+    <newGame>
+        <phrase>Between a Rock and a Hard Place</phrase>
+        <hint>Stuck between two bad options</hint>
+    </newGame>
+    <newGame>
+        <phrase>Break a Leg</phrase>
+        <hint>A way to say good luck</hint>
+    </newGame>
+    <newGame>
+        <phrase>Through the Grapevine</phrase>
+        <hint>Heard something indirectly</hint>
+    </newGame>
+    <newGame>
+        <phrase>The Ball is in Your Court</phrase>
+        <hint>It's your decision now</hint>
+    </newGame>
+    <newGame>
+        <phrase>Raining Cats and Dogs</phrase>
+        <hint>Raining very heavily</hint>
+    </newGame>
+    <newGame>
+        <phrase>Keep Your Chin Up</phrase>
+        <hint>Stay positive</hint>
+    </newGame>
+    <newGame>
+        <phrase>By the Skin of Your Teeth</phrase>
+        <hint>Narrowly escaping something</hint>
+    </newGame>
+    <newGame>
+        <phrase>Jump the Gun</phrase>
+        <hint>Do something too soon</hint>
+    </newGame>
+    <newGame>
+        <phrase>Close but No Cigar</phrase>
+        <hint>Almost, but not quite</hint>
+    </newGame>
+    <newGame>
+        <phrase>Put All Your Eggs in One Basket</phrase>
+        <hint>Relying too much on one thing</hint>
+    </newGame>
+    <newGame>
+        <phrase>Like a Fish Out of Water</phrase>
+        <hint>Feeling out of place</hint>
+    </newGame>
+    <newGame>
+        <phrase>Once in a Blue Moon</phrase>
+        <hint>Something that happens rarely</hint>
+    </newGame>
+    <newGame>
+        <phrase>Wild Goose Chase</phrase>
+        <hint>A pointless search</hint>
+    </newGame>
+    <newGame>
+        <phrase>Out of the Blue</phrase>
+        <hint>Happening unexpectedly</hint>
     </newGame>
 </hangman>

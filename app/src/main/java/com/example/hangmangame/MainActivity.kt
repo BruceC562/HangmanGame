@@ -2,10 +2,12 @@ package com.example.hangmangame
 
 import android.content.Context
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,11 +15,9 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -35,8 +35,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,19 +42,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.example.hangmangame.ui.theme.HangmanGameTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.xmlpull.v1.XmlPullParser
-
 
 data class HangmanWord (val word: String, val hint: String)
 
@@ -99,9 +99,10 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             HangmanGameTheme {
+                val hangmanViewModel: HangmanViewModel = viewModel()
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     HangmanGame(
-                        modifier = Modifier.padding(innerPadding), gameWords
+                        modifier = Modifier.padding(innerPadding), gameWords, viewModel = hangmanViewModel
                     )
                 }
             }
@@ -112,14 +113,13 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun HangmanGame(modifier: Modifier = Modifier, words: List<HangmanWord> = listOf()) {
-    var word by remember { mutableStateOf("") }
-    var currentWord by remember { mutableStateOf("") }
-    var hint by remember { mutableStateOf("") }
-    var hintCounter by remember { mutableIntStateOf(1) }
-    var lifeCounter by remember { mutableIntStateOf(0) }
-    val letterOptions = remember { mutableStateListOf<Char>() }
-    var gameState by remember { mutableStateOf(false) }
+fun HangmanGame(modifier: Modifier = Modifier, words: List<HangmanWord> = listOf(), viewModel: HangmanViewModel) {
+    val currentWord = viewModel.currentWord
+    val hint = viewModel.hint
+    val hintCounter = viewModel.hintCounter
+    val lifeCounter = viewModel.lifeCounter
+    val letterOptions = viewModel.letterOptions
+    val gameState = viewModel.gameState
 
     val configuration = LocalConfiguration.current //Gets the current orientation
     val windowAdaptiveInfo = currentWindowAdaptiveInfo()
@@ -130,59 +130,6 @@ fun HangmanGame(modifier: Modifier = Modifier, words: List<HangmanWord> = listOf
         )
     }
 
-    fun resetGame() {
-        val newWord = words.random()
-        word = newWord.word
-        //Changing word into underscores written by Gemini
-        currentWord = word.map { if (it == ' ') ' ' else '_' }.joinToString("")
-        hint = newWord.hint
-        hintCounter = 1
-        lifeCounter = 0
-        gameState = true
-        letterOptions.clear()
-        letterOptions.addAll(('A'..'Z').toList())
-    }
-
-    fun onLetterClick(letter: Char) {
-        val newWord = letterCheck(letter, word, currentWord)
-        if (newWord == currentWord) {
-            lifeCounter++
-        } else {
-            currentWord = newWord
-        }
-        letterOptions.remove(letter)
-    }
-
-    fun hint2() {
-        hintCounter++
-        lifeCounter++
-        removeHalfAvailableLetters(letterOptions, word)
-    }
-
-    fun hint3() {
-        hintCounter++
-        lifeCounter++
-        currentWord = revealVowels(word, currentWord)
-    }
-
-    //List of functions to update game variables
-    val functionList = mapOf<String, Any>(
-        "onLetterClick" to ::onLetterClick,
-        "resetGame" to ::resetGame,
-        "hint2" to ::hint2,
-        "hint3" to ::hint3
-    )
-
-    if (displayLandscape) {
-        println("reached")
-        LandscapeHangman(lifeCounter, hint, hintCounter, letterOptions, gameState, functionList)
-    } else {
-        PortraitHangman(currentWord, lifeCounter, letterOptions, gameState, functionList)
-    }
-}
-
-@Composable
-fun PortraitHangman(currentWord: String, lifeCounter: Int, options: List<Char>, gameState: Boolean, functionList: Map<String, Any>) {
     val hangmanImage = when (lifeCounter) {
         0 -> R.drawable.hangman_0
         1 -> R.drawable.hangman_1
@@ -190,13 +137,40 @@ fun PortraitHangman(currentWord: String, lifeCounter: Int, options: List<Char>, 
         3 -> R.drawable.hangman_3
         4 -> R.drawable.hangman_4
         5 -> R.drawable.hangman_5
-        6 -> R.drawable.hangman_6
-        else -> R.drawable.hangman_6 //Lose image
+        else -> R.drawable.hangman_6
     }
 
+    // Create a map of functions if needed
+    val functionList = mapOf(
+        "onLetterClick" to viewModel::onLetterClick,
+        "resetGame" to { viewModel.resetGame(words) },
+        "hint1" to viewModel::hint1,
+        "hint2" to viewModel::hint2,
+        "hint3" to viewModel::hint3
+    )
+
+    if (displayLandscape) {
+        LandscapeHangman(currentWord, lifeCounter, hangmanImage, hint, hintCounter, letterOptions, gameState, functionList)
+    } else {
+        PortraitHangman(currentWord, lifeCounter, hangmanImage, letterOptions, gameState, functionList)
+    }
+
+    if (gameState == GameState.WIN || gameState == GameState.LOSE) {
+        GameOverScreen(gameState) {
+            viewModel.resetGame(words)
+        }
+    }
+}
+
+@Composable
+fun PortraitHangman(
+    currentWord: String, lifeCounter: Int, hangmanImage: Int,
+    options: List<Char>, gameState: GameState, functionList: Map<String, Any>) {
     Column (
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth().padding(5.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(5.dp)
     ) {
         Text(
             text = "Hangman",
@@ -210,14 +184,15 @@ fun PortraitHangman(currentWord: String, lifeCounter: Int, options: List<Char>, 
             },
             modifier = Modifier.padding(5.dp)
         ) {
+            val isFirstGame = gameState == GameState.STOPPED
             Text(
-                text = if (gameState) "New Game" else "Start",
+                text = if (!isFirstGame) "New Game" else "Start",
             )
         }
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .fillMaxHeight(0.4f) // Adjust this value to control how much of the screen the image takes
+                .fillMaxHeight(0.4f)
         ) {
             Image(
                 painter = painterResource(id = hangmanImage),
@@ -225,45 +200,131 @@ fun PortraitHangman(currentWord: String, lifeCounter: Int, options: List<Char>, 
                 modifier = Modifier.fillMaxSize()
             )
         }
-        BuildText(currentWord, modifier = Modifier.weight(1f))
+        BuildText(currentWord, 45, modifier = Modifier.weight(1f))
         Text(
             text = "Choose a Letter",
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(top = 45.dp, bottom = 5.dp)
         )
-        BuildOptions(Modifier.weight(1f), options, false) { letter ->
+        BuildOptions(Modifier.weight(1f), options, false, gameState) { letter ->
             (functionList["onLetterClick"] as (Char) -> Unit)(letter)
         }
     }
-
 }
 
 @Composable
-fun LandscapeHangman(lifeCounter: Int, hint: String, hintCounter: Int,
-                     options: List<Char>, gameState: Boolean, functionList: Map<String, Any>) {
-    Row(
-
+fun LandscapeHangman(
+    currentWord: String, lifeCounter: Int, hangmanImage: Int, hint: String, hintCounter: Int,
+    options: List<Char>, gameState: GameState, functionList: Map<String, Any>) {
+    var displayHint by remember { mutableStateOf("") }
+    val toast = Toast.makeText(LocalContext.current, "Hint Unavailable", Toast.LENGTH_SHORT)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(5.dp)
     ) {
-        Column () {
-
+        Text(
+            text = "Hangman",
+            fontSize = 60.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(top = 10.dp, bottom = 5.dp)
+        )
+        Button(
+            onClick = {
+                displayHint = ""
+                (functionList["resetGame"] as () -> Unit)() //Gemini used for calling functions from the map
+            },
+            modifier = Modifier.padding(0.dp)
+        ) {
+            val isFirstGame = gameState == GameState.STOPPED
+            Text(
+                text = if (!isFirstGame) "New Game" else "Start",
+            )
         }
-        Column () {
-
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            Column (
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = "Choose a Letter",
+                    fontSize = 50.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 5.dp, bottom = 5.dp)
+                )
+                BuildOptions(Modifier.weight(1f), options, true, gameState) { letter ->
+                    (functionList["onLetterClick"] as (Char) -> Unit)(letter)
+                }
+                Box (
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier.weight(.5f)
+                ) {
+                    Button(
+                        onClick = {
+                            when (hintCounter) {
+                                1 -> {
+                                    (functionList["hint1"] as () -> Unit)()
+                                    displayHint = hint
+                                }
+                                2 -> if (lifeCounter != 5) (functionList["hint2"] as () -> Unit)() else toast.show()
+                                3 -> if (lifeCounter != 5) (functionList["hint3"] as () -> Unit)() else toast.show()
+                                else -> toast.show()
+                            }
+                        },
+                        modifier = Modifier.offset(y = (-65).dp)
+                    ) {
+                        Text(text = "Hint")
+                    }
+                    Text(
+                        text = displayHint,
+                        textAlign = TextAlign.Center,
+                        fontSize = 40.sp,
+                        fontWeight = FontWeight.Bold,
+                        lineHeight = 45.sp,
+                        modifier = Modifier.padding(10.dp)
+                    )
+                }
+            }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.weight(1f)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(0.6f)
+                ) {
+                    Image(
+                        painter = painterResource(id = hangmanImage),
+                        contentDescription = "Hangman $lifeCounter",
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+                BuildText(currentWord, 60, modifier = Modifier
+                    .weight(1f)
+                    .offset(y = (-60).dp))
+            }
         }
     }
 }
 
+//Builds the display text represented as currentWord
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun BuildText(currentWord: String, modifier: Modifier = Modifier) {
+fun BuildText(currentWord: String, textSize: Int, modifier: Modifier = Modifier) {
     val words = currentWord.split(" ") // Split the string into words
 
     FlowRow(
         modifier = modifier.padding(0.dp),
-        horizontalArrangement = Arrangement.spacedBy(20.dp)
+        horizontalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         //By looping through words, it ensures the whole row can fit on the row its on
+        //Assisted by Gemini
         words.forEach { word ->
             Row {
                 word.forEach { letter ->
@@ -273,15 +334,15 @@ fun BuildText(currentWord: String, modifier: Modifier = Modifier) {
                     ) {
                         Text(
                             text = if (letter != '_') letter.toString() else "",
-                            fontSize = 40.sp,
+                            fontSize = textSize.sp,
                             color = Color.Black,
                             fontFamily = FontFamily.Monospace
                         )
                         Text(
                             text = "_",
-                            fontSize = 55.sp,
+                            fontSize = (textSize+15).sp,
                             color = Color.Black,
-                            modifier = Modifier.offset(y = 3.dp),
+                            modifier = Modifier.offset(y = 2.dp),
                             fontFamily = FontFamily.Monospace
                         )
                     }
@@ -291,36 +352,41 @@ fun BuildText(currentWord: String, modifier: Modifier = Modifier) {
     }
 }
 
+//Builds the letter options and changes the layout based on screen orientation
 @Composable
-fun BuildOptions(modifier: Modifier = Modifier, options: List<Char>, isLandscape: Boolean, onLetterClick: (Char) -> Unit) {
+fun BuildOptions(modifier: Modifier = Modifier, options: List<Char>, isLandscape: Boolean, gameState: GameState = GameState.STOPPED, onLetterClick: (Char) -> Unit) {
     if (isLandscape) {
         LazyVerticalGrid (
-            columns = GridCells.Fixed(4),
-            modifier = modifier
+            columns = GridCells.Fixed(5),
+            modifier = modifier.padding(10.dp)
         ){
             items(options) {letter ->
-                LetterCard(letter)
+                LetterCard(letter, gameState, onLetterClick = { onLetterClick(letter) })
             }
         }
     } else {
         LazyRow(modifier = modifier.padding(10.dp)) {
             items(options) {letter ->
-                LetterCard(letter, onLetterClick = { onLetterClick(letter) })
+                LetterCard(letter, gameState, onLetterClick = { onLetterClick(letter) })
             }
         }
     }
 }
 
+//Builds each letter for the letter options (called from BuildOptions)
 @Composable
-fun LetterCard(letter: Char, modifier: Modifier = Modifier, onLetterClick: () -> Unit = {}) {
+fun LetterCard(letter: Char, gameState: GameState, modifier: Modifier = Modifier, onLetterClick: () -> Unit = {}) {
     Card(
         colors = CardDefaults.cardColors(Color.LightGray),
         elevation = CardDefaults.cardElevation(5.dp),
         modifier = modifier
             .padding(5.dp)
-            .size(60.dp)
+            .size(50.dp)
             .clip(RoundedCornerShape(10.dp))
-            .clickable { onLetterClick() }
+            .then(
+                if (gameState == GameState.INPROGRESS) Modifier.clickable { onLetterClick() }
+                else Modifier // No clickable modifier when game is not in progress
+            )
     ) {
         Box(
             contentAlignment = Alignment.Center,
@@ -336,47 +402,41 @@ fun LetterCard(letter: Char, modifier: Modifier = Modifier, onLetterClick: () ->
     }
 }
 
-//Builds the new currentWord by checking if the letter is in the word
-fun letterCheck(letter: Char, word: String, currentWord: String): String {
-    var newWord = ""
-    for (i in word.indices) {
-        newWord +=
-            if (word[i] == ' ') ' '
-            else {
-                if (word[i].uppercaseChar() == letter) word[i]
-                else currentWord[i]
-            }
-
-    }
-    return newWord
-}
-
-//Finds available letters not in word and removes half of them
-fun removeHalfAvailableLetters(options: MutableList<Char>, word: String) {
-    val lettersNotInWord = options.filter { it !in word}.toMutableList()
-    lettersNotInWord.shuffle()
-    options.removeAll(lettersNotInWord.take(lettersNotInWord.size / 2))
-}
-
-//Reveals all vowels in the word
-fun revealVowels(word: String, currentWord: String): String {
-    val vowels = "AEIOU"
-    var newWord = ""
-    for (i in word.indices) {
-        newWord +=
-            if (word[i] == ' ') ' '
-            else {
-                if (word[i].uppercaseChar() in vowels) word[i]
-                else currentWord[i]
-            }
-    }
-    return newWord
-}
-
-@Preview(showBackground = true)
 @Composable
-fun PreviewHangman() {
-    HangmanGameTheme {
-        HangmanGame(words = listOf(HangmanWord("Testing", "This is a hint")))
+fun GameOverScreen(gameState: GameState, onRestart: () -> Unit) {
+    val message = if (gameState == GameState.WIN) "You Win!" else "You Lose!"
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.7f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .padding(20.dp)
+                .background(Color.White, shape = RoundedCornerShape(15.dp))
+                .padding(20.dp)
+        ) {
+            Text(
+                text = message,
+                fontSize = 32.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black,
+                modifier = Modifier.padding(bottom = 20.dp)
+            )
+
+            Button(
+                onClick = {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        onRestart()
+                    }
+                },
+                modifier = Modifier.padding(top = 10.dp)
+            ) {
+                Text(text = "New Game")
+            }
+        }
     }
 }
